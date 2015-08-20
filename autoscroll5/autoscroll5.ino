@@ -1,10 +1,22 @@
 // The setup() method runs once, when the sketch starts
 
+//to program select
+//Board:"Arduino Duemilanove or Diecimila" and Processor:"ATmega168"
+
+//#define DEBUG
+
   const int scrollspeed = 75;
   
   unsigned long lastDebounceTime = 0;
   int lastButtonState = 815;
   unsigned long debounceDelay = 30;
+
+  unsigned long fmAmCount_lastTime = 0;
+  unsigned int fmAmCount = 0;
+  int amFmreading_temp = 0;
+  int amFmlastButtonState = 0;
+  bool amFmbuttonPressed = false;
+  bool amFmbuttonPressed_last = false;
   
   unsigned long lastscrolltime = 0;
   unsigned long trackupsignalstart;
@@ -77,7 +89,9 @@ void setup()   {
   digitalWrite(2, LOW);
   digitalWrite(buspin, HIGH);
   //digitalWrite(3, HIGH);
-  //Serial.begin(9600);
+  #ifdef DEBUG
+    Serial.begin(9600);
+  #endif
 }
 
 void left()  {
@@ -136,7 +150,7 @@ void checkdelay()
            //Serial.print(reading);
            //Serial.print("\t");
            //Serial.print(lastButtonState);
-           if (abs(reading - lastButtonState) > 3) {
+           if (abs(reading - lastButtonState) > 3) {    //value fluctuates a bit so if it changes by less than 3 then consider it unchanging
             // reset the debouncing timer
             lastDebounceTime = millis();
            }
@@ -147,13 +161,34 @@ void checkdelay()
            }
           //Serial.print("\t");
           //Serial.println(wheel);
+
            
-           amfm = analogRead(fmampin);
+           //debounce amfm button reading
+           amFmreading_temp = analogRead(fmampin);
+           if (amFmreading_temp > 54 && amFmreading_temp < 63) {
+            #ifdef DEBUG
+              Serial.print(millis()); Serial.print(" amFmreading_temp = "); Serial.println(amFmreading_temp);
+            #endif
+            fmAmCount++;
+            fmAmCount_lastTime = millis();
+           }
+           if (fmAmCount > 0 && (millis() - fmAmCount_lastTime) > 10) {
+            fmAmCount = 0;
+            amFmbuttonPressed = false;
+           }
+           if (fmAmCount >= 2) amFmbuttonPressed = true;
+           #ifdef DEBUG
+            if (amFmbuttonPressed_last != amFmbuttonPressed) {Serial.print("amFmbuttonPressed = "); Serial.println(amFmbuttonPressed);}
+           #endif
+
+           
            bus = digitalRead(buspin);
            //Serial.println(bus);
            //Serial.println(delaylength);
            if (isscrolling == true) {
-                 //Serial.println("true");
+//                #ifdef DEBUG
+//                 Serial.println("scrolling = true");
+//                #endif
                  //if (millis()-lastbuslow>1000) {Serial.println("TO");}
              
                  if (rknob == LOW) {                // Right knob delay
@@ -213,7 +248,11 @@ void checkdelay()
                       trackdownwaspressed = false;
                  }
 
-                 if (amfm > 54 && amfm < 63) {   // AM/FM button stop
+//                 if (amfm > 54 && amfm < 63) {   // AM/FM button stop.   got 59 once when button pressed
+                 if (amFmbuttonPressed) {   // AM/FM button stop.   got 59 once when button pressed
+//                   #ifdef DEBUG
+//                    Serial.print("amfm pin = "); Serial.println(amfm);
+//                   #endif
                     restart = false;
                     isscrolling = false;          // WILL NOT READ PROPERLY WITH
                     delaylength = 4000000000;        // LAPTOP cig lighter adaptor plugged in
@@ -257,7 +296,9 @@ void checkdelay()
           //wheel = 815;      //needed to reset once per loop because debounce code above 'holds' wheel at a value
           }
            if (isscrolling == false) {
-                 //Serial.println("false");
+//                #ifdef DEBUG
+//                 Serial.println("scrolling = false");
+//                #endif
                  
                  if (bus == LOW) {
                    if (millis()-lastbuslow>1000) {firstbuscheck=false;}  //timeout so restart firstbuslow
@@ -273,7 +314,8 @@ void checkdelay()
                     firstbuscheck = false;
                  }
                  
-                 if (amfm > 56 && amfm < 63) {   // AM/FM button stop
+//                 if (amfm > 56 && amfm < 63) {   // AM/FM button stop
+                 if (amFmbuttonPressed) {   // AM/FM button stop
                                                   // WILL NOT READ PROPERLY WITH
                                                   // LAPTOP cig lighter adaptor plugged in
                     outofmp3timeindex = millis();
@@ -308,6 +350,7 @@ void checkdelay()
                  }
                  lastButtonState = reading;
            }
+           amFmbuttonPressed_last = amFmbuttonPressed;
          delay(0);  // i *think* this stopped the volume up/dn from randomly changing the track
                     // but could also be making it miss AMFM button detection
                     // might need to use delayMicroseconds() ??
