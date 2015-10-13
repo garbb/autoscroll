@@ -72,8 +72,8 @@
 
 void setup()   {
   //delay(8000);
-  pinMode(12, OUTPUT);
-  pinMode(11, OUTPUT);
+  pinMode(scrollpin1, OUTPUT);
+  pinMode(scrollpin2, OUTPUT);
   
   pinMode(7, OUTPUT);
   pinMode(6, OUTPUT);
