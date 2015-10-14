@@ -58,8 +58,8 @@
     Scroll outputs               digital 11,12
 */
 
-  int scrollpin1 = 11;
-  int scrollpin2 = 12;
+  #define scrollpin1 11
+  #define scrollpin2 12
   int rtknobpin = 8;
   int wheelreadpin = 0;  //analog pin
   int fmampin = 4;  //analog pin
@@ -69,6 +69,22 @@
   int wheel = 0;
   int amfm;
   int bus = HIGH;
+
+  //thresholds for wheel buttons
+  #define volUp_min 80
+  #define volUp_max 120
+  #define volDn_min 0
+  #define volDn_max 50
+  #define trkUp_min 170
+  #define trkUp_max 210
+  #define trkDn_min 290
+  #define trkDn_max 330
+  #define mode_min 437
+  #define mode_max 477
+  #define mute_min 608
+  #define mute_max 648
+  #define none_min 800
+  #define none_max 830
 
 void setup()   {
   //delay(8000);
@@ -219,7 +235,7 @@ void checkdelay()
                     delaylength = 5000;
                  }
                  
-                 if (wheel > 80 && wheel <= 120) {           // wheel vol+
+                 if (wheel > volUp_min && wheel <= volUp_max) {           // wheel vol+
                     volupwaspressed = true;
                     starttime = millis();
                     delaylength = 500;
@@ -230,7 +246,7 @@ void checkdelay()
                       volupwaspressed = false;
                  }
                  
-                 if (wheel <= 50) {                   // wheel vol-
+                 if (wheel <= volDn_max) {                   // wheel vol-
                     voldownwaspressed = true;
                     starttime = millis();
                     delaylength = 500;
@@ -241,7 +257,7 @@ void checkdelay()
                       voldownwaspressed = false;
                  }
                  
-                 if (wheel > 170 && wheel <= 210) {                                 // wheel T-UP delay
+                 if (wheel > trkUp_min && wheel <= trkUp_max) {                                 // wheel T-UP delay
                     trackupwaspressed = true;
                     starttime = millis();
                     restart = true;
@@ -253,7 +269,7 @@ void checkdelay()
                       trackupwaspressed = false;
                  }
                  
-                 if (wheel > 290 && wheel <= 330) {                                // wheel T-DN delay
+                 if (wheel > trkDn_min && wheel <= trkDn_max) {                                // wheel T-DN delay
                     trackdownwaspressed = true;
                     starttime = millis();
                     restart = true;
@@ -275,7 +291,7 @@ void checkdelay()
                     delaylength = 4000000000;        // LAPTOP cig lighter adaptor plugged in
                     outofmp3timeindex = millis();
                  } 
-                 if (wheel > 437 && wheel <= 477) {   // MODE button stop
+                 if (wheel > mode_min && wheel <= mode_max) {   // MODE button stop
                     restart = false;
                     isscrolling = false;
                     delaylength = 4000000000;
@@ -283,7 +299,7 @@ void checkdelay()
                     digitalWrite(3, HIGH);
                  }
                  
-                 if (wheel > 608 && wheel <= 648) {   // wheel mute
+                 if (wheel > mute_min && wheel <= mute_max) {   // wheel mute
                       if (millis()-mutewaspressedtime>100) {
                         mutewaspressed = true;
                         if (delaylength == 3000001) delaylength = scrollspeed;
@@ -297,7 +313,7 @@ void checkdelay()
                       mutewaspressed = false;
                  }
                  
-                 if (wheel > 800 && wheel <= 830) {   // wheel none pressed
+                 if (wheel > none_min && wheel <= none_max) {   // wheel none pressed
                       if (millis()-volupsignalstart>50) digitalWrite(7, LOW);
                       if (millis()-voldownsignalstart>50) digitalWrite(6, LOW);
                       if (millis()-trackupsignalstart>100) digitalWrite(5, LOW);
@@ -334,26 +350,26 @@ void checkdelay()
                     outofmp3timeindex = millis();
                  } 
                  
-                 if (wheel > 80 && wheel <= 120) {           // wheel vol+
+                 if (wheel > volUp_min && wheel <= volUp_max) {           // wheel vol+
                     digitalWrite(7, HIGH);
                  }
-                 if (wheel <= 50) {                   // wheel vol-  should read 36
+                 if (wheel <= volDn_max) {                   // wheel vol-  should read 36
                     digitalWrite(6, HIGH);
                  }
-                 if (wheel > 170 && wheel <= 210) {   // wheel T-UP
+                 if (wheel > trkUp_min && wheel <= trkUp_max) {   // wheel T-UP
                       digitalWrite(5, HIGH);
                  }
-                 if (wheel > 290 && wheel <= 330) {   // wheel T-DN
+                 if (wheel > trkDn_min && wheel <= trkDn_max) {   // wheel T-DN
                       digitalWrite(4, HIGH);
                  }
-                 if (wheel > 608 && wheel <= 648) {   // wheel mute
+                 if (wheel > mute_min && wheel <= mute_max) {   // wheel mute
                       digitalWrite(2, HIGH);
                  }
-                 if (wheel > 437 && wheel <= 477) {   // wheel mode
+                 if (wheel > mode_min && wheel <= mode_max) {   // wheel mode
                  digitalWrite(3, HIGH);
                  outofmp3timeindex = millis();
                  }
-                 if (wheel > 800 && wheel <= 830) {   // wheel none pressed
+                 if (wheel > none_min && wheel <= none_max) {   // wheel none pressed
                       digitalWrite(7, LOW);
                       digitalWrite(6, LOW);
                       digitalWrite(5, LOW);
