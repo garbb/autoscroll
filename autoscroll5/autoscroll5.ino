@@ -58,8 +58,8 @@
     Scroll outputs               digital 11,12
 */
 
-  int scrollpin1 = 12;
-  int scrollpin2 = 11;
+  int scrollpin1 = 11;
+  int scrollpin2 = 12;
   int rtknobpin = 8;
   int wheelreadpin = 0;  //analog pin
   int fmampin = 4;  //analog pin
@@ -74,6 +74,8 @@ void setup()   {
   //delay(8000);
   pinMode(scrollpin1, OUTPUT);
   pinMode(scrollpin2, OUTPUT);
+  digitalWrite(scrollpin1, LOW);
+  digitalWrite(scrollpin2, LOW);
   
   pinMode(7, OUTPUT);
   pinMode(6, OUTPUT);
@@ -88,39 +90,60 @@ void setup()   {
   digitalWrite(3, LOW);
   digitalWrite(2, LOW);
   digitalWrite(buspin, HIGH);
-  //digitalWrite(3, HIGH);
   #ifdef DEBUG
     Serial.begin(9600);
   #endif
 }
 
+//simulate closing of one of the "switches" inside the encoder
+//short encoder pin to GND
+void scrollPinClose(int scrollpin) {
+//  digitalWrite(scrollpin, LOW);
+  pinMode(scrollpin, OUTPUT);
+}
+
+//simulate opening of one of the "switches" inside the encoder
+//set pin to INPUT mode (high impedance ~100mohm)
+void scrollPinOpen(int scrollpin) {
+//  digitalWrite(scrollpin, HIGH);
+  pinMode(scrollpin, INPUT);
+}
+
 void left()  {
   checkdelay();
-  digitalWrite(scrollpin1, LOW);
-  digitalWrite(scrollpin2, LOW); lastscrolltime = millis();
+  scrollPinClose(scrollpin1);
+  scrollPinClose(scrollpin2);
+  lastscrolltime = millis();
+  
   checkdelay();
-  digitalWrite(scrollpin1, HIGH);
-  digitalWrite(scrollpin2, LOW); lastscrolltime = millis();
+  scrollPinOpen(scrollpin1);
+  lastscrolltime = millis();
+  
   checkdelay();
-  digitalWrite(scrollpin1, HIGH);
-  digitalWrite(scrollpin2, HIGH); lastscrolltime = millis();
+  scrollPinOpen(scrollpin2);
+  lastscrolltime = millis();
+  
   checkdelay();
-  digitalWrite(scrollpin1, LOW);
-  digitalWrite(scrollpin2, HIGH); lastscrolltime = millis();
+  scrollPinClose(scrollpin1);
+  lastscrolltime = millis();
 }
 void right()  {
   checkdelay();
-  digitalWrite(scrollpin1, LOW);
-  digitalWrite(scrollpin2, LOW); lastscrolltime = millis();
+  scrollPinClose(scrollpin1);
+  scrollPinClose(scrollpin2);
+  lastscrolltime = millis();
+  
   checkdelay();
-  digitalWrite(scrollpin1, LOW);
-  digitalWrite(scrollpin2, HIGH); lastscrolltime = millis();
+  scrollPinOpen(scrollpin2);
+  lastscrolltime = millis();
+  
   checkdelay();
-  digitalWrite(scrollpin1, HIGH);
-  digitalWrite(scrollpin2, HIGH); lastscrolltime = millis();
+  scrollPinOpen(scrollpin1);
+  lastscrolltime = millis();
+  
   checkdelay();
-  digitalWrite(scrollpin1, HIGH);
-  digitalWrite(scrollpin2, LOW); lastscrolltime = millis();
+  scrollPinClose(scrollpin2);
+  lastscrolltime = millis();
 }
 
 
@@ -193,8 +216,6 @@ void checkdelay()
              
                  if (rknob == LOW) {                // Right knob delay
                     starttime = millis();
-                    //digitalWrite(scrollpin1, LOW);
-                    //digitalWrite(scrollpin2, LOW);
                     delaylength = 5000;
                  }
                  
@@ -223,8 +244,6 @@ void checkdelay()
                  if (wheel > 170 && wheel <= 210) {                                 // wheel T-UP delay
                     trackupwaspressed = true;
                     starttime = millis();
-                    //digitalWrite(scrollpin1, LOW);
-                    //digitalWrite(scrollpin2, LOW);
                     restart = true;
                     delaylength = 11000;
                  }
@@ -237,8 +256,6 @@ void checkdelay()
                  if (wheel > 290 && wheel <= 330) {                                // wheel T-DN delay
                     trackdownwaspressed = true;
                     starttime = millis();
-                    //digitalWrite(scrollpin1, LOW);
-                    //digitalWrite(scrollpin2, LOW);
                     restart = true;
                     delaylength = 11000;
                  }
@@ -256,16 +273,12 @@ void checkdelay()
                     restart = false;
                     isscrolling = false;          // WILL NOT READ PROPERLY WITH
                     delaylength = 4000000000;        // LAPTOP cig lighter adaptor plugged in
-                    //digitalWrite(scrollpin1, LOW);
-                    //digitalWrite(scrollpin2, LOW);
                     outofmp3timeindex = millis();
                  } 
                  if (wheel > 437 && wheel <= 477) {   // MODE button stop
                     restart = false;
                     isscrolling = false;
                     delaylength = 4000000000;
-                    //digitalWrite(scrollpin1, LOW);
-                    //digitalWrite(scrollpin2, LOW);
                     outofmp3timeindex = millis();
                     digitalWrite(3, HIGH);
                  }
