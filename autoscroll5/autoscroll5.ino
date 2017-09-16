@@ -1,9 +1,22 @@
-// The setup() method runs once, when the sketch starts
+#include "TimerOne.h"
 
 //to program select
 //Board:"Arduino Duemilanove or Diecimila" and Processor:"ATmega168"
 
 //#define DEBUG
+
+//DAC setup
+#define PWMDACpin 9
+#define PWMperiod 32
+#define DACOUT(n) Timer1.pwm(PWMDACpin, n)
+//DAC values to get proper output voltages for wheel button simulation
+#define WHEEL_NONE 820
+#define VOL_DOWN 24
+#define VOL_UP 102
+#define TRK_UP 184
+#define TRK_DOWN 307
+#define MUTE 614
+#define MODE 450
 
   const int scrollspeed = 75;
   
@@ -106,6 +119,11 @@ void setup()   {
   digitalWrite(3, LOW);
   digitalWrite(2, LOW);
   digitalWrite(buspin, HIGH);
+
+  //setup DAC output (pin and timer we need)
+  pinMode(PWMDACpin, OUTPUT);
+  Timer1.initialize(PWMperiod);
+  
   #ifdef DEBUG
     Serial.begin(9600);
   #endif
@@ -225,9 +243,9 @@ void checkdelay()
            //Serial.println(bus);
            //Serial.println(delaylength);
            if (isscrolling == true) {
-//                #ifdef DEBUG
-//                 Serial.println("scrolling = true");
-//                #endif
+                #ifdef DEBUG
+                 Serial.println("scrolling = true");
+                #endif
                  //if (millis()-lastbuslow>1000) {Serial.println("TO");}
              
                  if (rknob == LOW) {                // Right knob delay
@@ -290,12 +308,16 @@ void checkdelay()
                     isscrolling = false;          // WILL NOT READ PROPERLY WITH
                     delaylength = 4000000000;        // LAPTOP cig lighter adaptor plugged in
                     outofmp3timeindex = millis();
+                    scrollPinOpen(scrollpin1);
+                    scrollPinOpen(scrollpin2);
                  } 
                  if (wheel > mode_min && wheel <= mode_max) {   // MODE button stop
                     restart = false;
                     isscrolling = false;
                     delaylength = 4000000000;
                     outofmp3timeindex = millis();
+                    scrollPinOpen(scrollpin1);
+                    scrollPinOpen(scrollpin2);
                     digitalWrite(3, HIGH);
                  }
                  
@@ -325,9 +347,9 @@ void checkdelay()
           //wheel = 815;      //needed to reset once per loop because debounce code above 'holds' wheel at a value
           }
            if (isscrolling == false) {
-//                #ifdef DEBUG
-//                 Serial.println("scrolling = false");
-//                #endif
+                #ifdef DEBUG
+                 Serial.println("scrolling = false");
+                #endif
                  
                  if (bus == LOW) {
                    if (millis()-lastbuslow>1000) {firstbuscheck=false;}  //timeout so restart firstbuslow

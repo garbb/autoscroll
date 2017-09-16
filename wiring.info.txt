@@ -1,0 +1,12 @@
+bus pin d10
+	small black wire shoved into same connector slot as orange wire in connector to underside of stereo where ipod kit connects
+
+am/fm button wire analog 4
+	connected to a pin on amfm button
+	can remove front faceplate with all buttons on it by removing screws (two on back of faceplate on each side)
+	and can pop off plastic surrounding top row of buttons by bushing tabs on side
+		then can pop off amfm button by pushing down on white plastic clip on top of inside of button
+
+right knob wire is on right side of right.knob&scroll.wires.JPG
+
+scroll wires are on left side of right.knob&scroll.wires.JPG
